@@ -2,7 +2,7 @@ import streamlit as st
 from deepseek_api import DeepSeekAPI  # Necesitarás instalar o implementar este cliente
 
 # Mostrar título y descripción
-st.title("💬 Chatbot")
+st.title("💬 Chatbot TSS ")
 st.write(
     "Este es un chatbot simple que usa el modelo de DeepSeek para generar respuestas. "
     "Para usar esta aplicación, necesitas proporcionar una API key de DeepSeek."
