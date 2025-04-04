@@ -1,56 +1,53 @@
 import streamlit as st
-from openai import OpenAI
+from deepseek_api import DeepSeekAPI  # Necesitarás instalar o implementar este cliente
 
-# Show title and description.
+# Mostrar título y descripción
 st.title("💬 Chatbot")
 st.write(
-    "This is a simple chatbot that uses OpenAI's GPT-3.5 model to generate responses. "
-    "To use this app, you need to provide an OpenAI API key, which you can get [here](https://platform.openai.com/account/api-keys). "
-    "You can also learn how to build this app step by step by [following our tutorial](https://docs.streamlit.io/develop/tutorials/llms/build-conversational-apps)."
+    "Este es un chatbot simple que usa el modelo de DeepSeek para generar respuestas. "
+    "Para usar esta aplicación, necesitas proporcionar una API key de DeepSeek."
 )
 
-# Ask user for their OpenAI API key via `st.text_input`.
-# Alternatively, you can store the API key in `./.streamlit/secrets.toml` and access it
-# via `st.secrets`, see https://docs.streamlit.io/develop/concepts/connections/secrets-management
-openai_api_key = st.text_input("OpenAI API Key", type="password")
-if not openai_api_key:
-    st.info("Please add your OpenAI API key to continue.", icon="🗝️")
+# Pedir al usuario su API key de DeepSeek
+deepseek_api_key = st.text_input("DeepSeek API Key", type="password")
+if not deepseek_api_key:
+    st.info("Por favor añade tu API key de DeepSeek para continuar.", icon="🗝️")
 else:
+    # Crear un cliente de DeepSeek
+    client = DeepSeekAPI(api_key=deepseek_api_key)  # Ajusta según el cliente real de DeepSeek
 
-    # Create an OpenAI client.
-    client = OpenAI(api_key=openai_api_key)
-
-    # Create a session state variable to store the chat messages. This ensures that the
-    # messages persist across reruns.
+    # Variable de estado para almacenar los mensajes del chat
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Display the existing chat messages via `st.chat_message`.
+    # Mostrar los mensajes existentes
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Create a chat input field to allow the user to enter a message. This will display
-    # automatically at the bottom of the page.
-    if prompt := st.chat_input("What is up?"):
-
-        # Store and display the current prompt.
+    # Campo de entrada para el chat
+    if prompt := st.chat_input("¿Qué necesitas?"):
+        # Almacenar y mostrar el mensaje del usuario
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Generate a response using the OpenAI API.
-        stream = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+        # Generar una respuesta usando la API de DeepSeek
+        # NOTA: Los parámetros pueden variar según la API de DeepSeek
+        response = client.chat_completion(
+            model="deepseek-chat",  # Verifica el nombre correcto del modelo
             messages=[
                 {"role": m["role"], "content": m["content"]}
                 for m in st.session_state.messages
             ],
-            stream=True,
+            stream=True  # Si DeepSeek soporta streaming
         )
 
-        # Stream the response to the chat using `st.write_stream`, then store it in 
-        # session state.
+        # Mostrar la respuesta
         with st.chat_message("assistant"):
-            response = st.write_stream(stream)
-        st.session_state.messages.append({"role": "assistant", "content": response})
+            if isinstance(response, str):
+                st.markdown(response)
+            else:
+                # Si es un stream, procesarlo adecuadamente
+                response_text = st.write_stream(response)  # Ajusta según cómo funcione el streaming
+        st.session_state.messages.append({"role": "assistant", "content": response_text})
