@@ -14,8 +14,8 @@ if not deepseek_api_key:
     st.info("Por favor añade tu API key de DeepSeek para continuar.", icon="🗝️")
 else:
     # Crear un cliente de DeepSeek
-    client = DeepSeekAPI(api_key=deepseek_api_key)  # Ajusta según el cliente real de DeepSeek
-
+    #client = DeepSeekAPI(api_key=deepseek_api_key)  # Ajusta según el cliente real de DeepSeek
+    client = OpenAI(api_key=deepseek_api_key, base_url="https://api.deepseek.com")
     # Variable de estado para almacenar los mensajes del chat
     if "messages" not in st.session_state:
         st.session_state.messages = []
